@@ -19,8 +19,10 @@ else if userChoice is "Set Date" then
 	set newDate to text returned of (display dialog "Enter new date (YYYY-MM-DD):" default answer "2024-01-01")
 end if
 
-repeat with photo in photoFiles
+repeat with photoIndex from 1 to count of photoFiles
+	set photo to item photoIndex of photoFiles
 	set photoPath to POSIX path of photo
+	set the result to "Processing " & (name of (info for photo)) & " – " & photoIndex & "/" & (count of photoFiles)
 	set fileExtension to do shell script "echo " & quoted form of photoPath & " | awk -F. '{print tolower($NF)}'"
 	
 	if fileExtension is in {"jpg", "jpeg", "png"} then
@@ -47,7 +49,11 @@ repeat with photo in photoFiles
 					"-Keys:CreationDate+=0:0:" & shiftDays & " " & ¬
 					"-overwrite_original " & quoted form of photoPath
 			else
-				set shiftCommand to exiftoolPath & " " & exifField & "+=\"0:0:" & shiftDays & " 0:0:0\" -overwrite_original " & quoted form of photoPath
+				set shiftCommand to exiftoolPath & " " & ¬
+					"-DateTimeOriginal" & "+=\"0:0:" & shiftDays & " 0:0:0\" " & ¬
+					"-ModifyDate" & "+=\"0:0:" & shiftDays & " 0:0:0\" " & ¬
+					"-CreateDate" & "+=\"0:0:" & shiftDays & " 0:0:0\" " & ¬
+					"-overwrite_original " & quoted form of photoPath
 			end if
 			-- display dialog "Executing: " & shiftCommand
 			do shell script shiftCommand
@@ -71,7 +77,11 @@ repeat with photo in photoFiles
 					"-Keys:CreationDate='" & formattedNewDate & "' " & ¬
 					"-overwrite_original " & quoted form of photoPath
 			else
-				set setDateCommand to exiftoolPath & " " & exifField & "='" & formattedNewDate & "' -overwrite_original " & quoted form of photoPath
+				set setDateCommand to exiftoolPath & " " & ¬
+					"-DateTimeOriginal='" & formattedNewDate & "' " & ¬
+					"-ModifyDate='" & formattedNewDate & "' " & ¬
+					"-CreateDate='" & formattedNewDate & "' " & ¬
+					"-overwrite_original " & quoted form of photoPath
 			end if
 			
 			-- display dialog "Executing: " & setDateCommand
